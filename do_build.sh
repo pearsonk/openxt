@@ -670,30 +670,6 @@ do_sync_cache_back()
     set -o pipefail
 }
 
-do_cleanup()
-{
-        set +o pipefail
-        local path="$1"
-        local ramdisk="$path/oe"
-
-        # Kill old process that could use this directory
-        lsof | grep "$(pwd)/$path/" | awk '{print $2}' | while read pid; do
-                [ "$$" != "$pid" ] && kill -9 "$pid" || true
-        done
-
-        local type="`df -T "$ramdisk" | tail -n1 | awk '{print $2}'`"
-        local dev="`df -T "$ramdisk" | tail -n1 | awk '{print $1}'`"
-        if [ "$type" == "tmpfs" ]; then
-                sudo umount "$ramdisk"
-        elif [ "$dev" == "/dev/ram0" ]; then
-                sudo umount "$ramdisk"
-        fi
-        sudo rm -rf "$ramdisk"
-        mkdir -p "$ramdisk"
-        sudo rm -rf "$path"
-        set -o pipefail
-}
-
 list_manifest_suffixes()
 {
         (
@@ -1517,8 +1493,6 @@ do_build()
                                 do_copy ;;
                         packages_tree)
                                 do_oe_packages_tree "$path" ;;
-                        cleanup)
-                                do_cleanup "$path" ;;
                         sdk)
                                 do_sdk ;;
                         rmoutput)
