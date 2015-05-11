@@ -1483,17 +1483,17 @@ do_build()
                 bg=""
                 [ "`expr "$i" : ".* &"`" != "0" ] && bg="do_bg"
                 case "$i" in
-                        sync_cache_back*)
+                        sync_cache_back)
                                 do_sync_cache_back ;;
-                        sync_cache*)
+                        sync_cache)
                                 do_sync_cache ;;
-                        setupoe*)
+                        setupoe)
                                 # NOTE: the ramdisk is off by default so normally
                                 # create_ramdisk is a no-op
                                 create_ramdisk "$path/oe" "$RAMDISK" && \
                                 do_oe_setup "$path" "$BRANCH"
                                 ;;
-                        extra_pkgs*)
+                        extra_pkgs)
                                 do_oe_extra_pkgs "$path" ;; 
                         dom0)
                                 $bg do_oe_dom0 "$path" ;;
@@ -1503,7 +1503,7 @@ do_build()
                                 $bg do_oe_sysroot "$path" ;;
                         sysrootcp)
                                 do_oe_sysroot_copy "$path" ;;
-                        initramfs*)
+                        initramfs)
                                 $bg do_oe "$path" "xenclient-dom0" "xenclient-initramfs-image" ;;
                         stubinitramfs)
                                 $bg do_oe "$path" "xenclient-stubdomain" "xenclient-stubdomain-initramfs-image" ;;
@@ -1515,9 +1515,9 @@ do_build()
                                 $bg do_oe_installer_part2 "$path" ;;
                         installer2cp)
                                 do_oe_installer_part2_copy "$path" ;;
-                        license*)
+                        license)
                                 $bg do_oe_copy_licenses "$path" ;;
-                        sourceinfo*)
+                        sourceinfo)
                                 $bg do_oe_merge_src_info "$path" ;;
                         uivm)
                                 $bg do_oe_uivm "$path" ;;
@@ -1542,35 +1542,35 @@ do_build()
                                 do_oe_syncvm_copy "$path" ;;
                         syncuicp)
                                 do_oe_syncui_copy "$path" ;;
-                        xctools*)
+                        xctools)
                                 $bg do_xctools "$path/xctools" ;;
                         debian)
                                 $bg do_debian_xctools "." "xc-tools-tmp/linux" ;;
-                        oldxctools*)
+                        oldxctools)
                                 $bg do_useexisting_xctools "$path/xctools" ;;
                         debian_repo_xctools)
                                 do_xctools_debian_repo "$path" ;;
                         debian_repo_xctools_copy)
                                 do_xctools_debian_repo_copy "$path" ;;
-                        ship*)
+                        ship)
                                 do_ship ;;
                         source)
                                 do_oe_source "$path" ;;
                         sourcecp)
                                 do_oe_source_copy "$path" ;;
-                        copy*)
+                        copy)
                                 do_copy ;;
-                        packages_tree*)
+                        packages_tree)
                                 do_oe_packages_tree "$path" ;;
-                        sim*)
+                        sim)
                                 $bg do_sim "$path/xc-sim" ;;
-                        cleanup*)
+                        cleanup)
                                 do_cleanup "$path" ;;
                         sdk)
                                 do_sdk ;;
-                        rmoutput*)
+                        rmoutput)
                                 do_rmoutput ;;
-                        wait*)
+                        wait)
                                 arg="`echo "$i" | cut -d" " -f2`"
                                 eval pid='$'"${arg}_pid"
                                 echo "Wait for task $arg (pid=$pid)"
