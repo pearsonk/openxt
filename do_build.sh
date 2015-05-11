@@ -91,24 +91,6 @@ do_make()
         )
 }
 
-do_sim()
-{
-        local path="$1"
-        local dom0rootfs="$OUTPUT_DIR/$NAME/raw/dom0-rootfs.i686.ext3.gz"
-
-        mkdir -p "$path"
-        pushd "$path"
-
-        git_clone "xc-test" "$OPENXT_GIT_PROTOCOL://$OPENXT_GIT_MIRROR/xc-test.git" "$BRANCH" "$ALLOW_SWITCH_BRANCH_FAIL"
-
-        pushd "xc-test/xc-sim"
-
-        do_make "BUILDNO=${ID} ID=${ID} ROOTFS=${dom0rootfs} xc-sim" "build.log"
-
-        popd
-        popd
-}
-
 do_oe_log()
 {
     (
@@ -1562,8 +1544,6 @@ do_build()
                                 do_copy ;;
                         packages_tree)
                                 do_oe_packages_tree "$path" ;;
-                        sim)
-                                $bg do_sim "$path/xc-sim" ;;
                         cleanup)
                                 do_cleanup "$path" ;;
                         sdk)
