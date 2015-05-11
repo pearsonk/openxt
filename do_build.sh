@@ -262,23 +262,6 @@ EOF
     fi
 }
 
-do_oe_check_cpp()
-{
-        local path="$1"
-
-        pushd "$path"
-
-        cat <<- EOF > fish.cpp
-#include <stdio.h>
-int main(int argc, char *argv[]) { printf("fish\n"); }
-EOF
-
-        export MACHINE="xenclient-dom0"
-         build/cross/i686core2/bin/i686-angstrom-linux-gcc -c -o fish.o fish.cpp | do_oe_log
-        rm -rf fish.o fish.cpp
-        popd
-}
-
 do_oe()
 {
         local path="$1"
