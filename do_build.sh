@@ -79,18 +79,6 @@ create_ramdisk()
 
 }
 
-do_make()
-{
-        local rule="$1"
-        local output="$2"
-
-        (
-        set +x
-         < /dev/null make $rule 2>&1 | \
-                while read l; do echo "$(date "+[%H:%M:%S.%N]"): $l"; done | tee "$output";
-        )
-}
-
 do_oe_log()
 {
     (
