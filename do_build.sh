@@ -345,48 +345,32 @@ do_oe_extra_pkgs()
         do_oe "$path" "xenclient-dom0" "package-index"
 }
 
-do_oe_uivm_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "uivm" "xenclient-uivm" "xenclient-uivm"
-}
-
 do_oe_uivm()
 {
         local path="$1"
         do_oe "$path" "xenclient-uivm" "xenclient-uivm-image"
-        do_oe_uivm_copy $path
-}
-
-do_oe_ndvm_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "ndvm" "xenclient-ndvm" "xenclient-ndvm"
+        do_oe_copy "$path" "uivm" "xenclient-uivm" "xenclient-uivm"
 }
 
 do_oe_ndvm()
 {
         local path="$1"
         do_oe "$path" "xenclient-ndvm" "xenclient-ndvm-image"
-        do_oe_ndvm_copy $path
-}
-
-do_oe_syncvm_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "syncvm" "xenclient-syncvm" "xenclient-syncvm"
+        do_oe_copy "$path" "ndvm" "xenclient-ndvm" "xenclient-ndvm"
 }
 
 do_oe_syncvm()
 {
         local path="$1"
         do_oe "$path" "xenclient-syncvm" "xenclient-syncvm-image"
-        do_oe_syncvm_copy $path
+        do_oe_copy "$path" "syncvm" "xenclient-syncvm" "xenclient-syncvm"
 }
 
-do_oe_syncui_copy()
+do_oe_syncui()
 {
         local path="$1"
+        do_oe "$path" "xenclient-syncui" "sync-wui"
+
         pushd "$path"
         mkdir -p "$OUTPUT_DIR/$NAME/raw"
         cp tmp-eglibc/deploy/tar/sync-wui-0+git*.tar.gz "$OUTPUT_DIR/$NAME/raw/sync-wui-${RELEASE}.tar.gz"
@@ -394,43 +378,27 @@ do_oe_syncui_copy()
         popd
 }
 
-do_oe_syncui()
-{
-        local path="$1"
-        do_oe "$path" "xenclient-syncui" "sync-wui"
-        do_oe_syncui_copy "$path"
-}
-
-do_oe_dom0_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "dom0" "xenclient-dom0" "xenclient-dom0"
-}
-
 do_oe_dom0()
 {
         local path="$1"
         do_oe "$path" "xenclient-dom0" "xenclient-dom0-image"
-        do_oe_dom0_copy $path
-}
-
-do_oe_sysroot_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "sysroot" "xenclient-sysroot" "xenclient-dom0"
+        do_oe_copy "$path" "dom0" "xenclient-dom0" "xenclient-dom0"
 }
 
 do_oe_sysroot()
 {
         local path="$1"
         do_oe "$path" "xenclient-dom0" "xenclient-sysroot-image"
-        do_oe_sysroot_copy $path
+        do_oe_copy "$path" "sysroot" "xenclient-sysroot" "xenclient-dom0"
 }
 
-do_oe_installer_copy()
+do_oe_installer()
 {
         local path="$1"
         local binaries="tmp-eglibc/deploy/images"
+
+        do_oe "$path" "xenclient-dom0" "xenclient-installer-image"
+
         pushd "$path"
 
         mkdir -p "$OUTPUT_DIR/$NAME/raw/installer"
@@ -455,18 +423,13 @@ do_oe_installer_copy()
         popd
 }
 
-do_oe_installer()
-{
-        local path="$1"
-
-        do_oe "$path" "xenclient-dom0" "xenclient-installer-image"
-        do_oe_installer_copy $path
-}
-
-do_oe_installer_part2_copy()
+do_oe_installer_part2()
 {
         local path="$1"
         local binaries="tmp-eglibc/deploy/images"
+
+        do_oe "$path" "xenclient-dom0" "xenclient-installer-part2-image"
+
         pushd "$path"
 
         mkdir -p "$OUTPUT_DIR/$NAME/raw"
@@ -474,14 +437,6 @@ do_oe_installer_part2_copy()
         cp "$binaries/xenclient-installer-part2-image-xenclient-dom0.tar.bz2" "$OUTPUT_DIR/$NAME/raw/control.tar.bz2"
 
         popd
-}
-
-do_oe_installer_part2()
-{
-        local path="$1"
-
-        do_oe "$path" "xenclient-dom0" "xenclient-installer-part2-image"
-        do_oe_installer_part2_copy $path
 }
 
 do_oe_source_shrink()
@@ -506,10 +461,19 @@ do_oe_source_shrink()
         done
 }
 
-do_oe_source_copy()
+do_oe_source()
 {
         local path="$1"
         local rootfs="tmp-eglibc/deploy/images/xenclient-source-image-xenclient-dom0.raw"
+
+        if [ "$SOURCE" -eq 0 ]
+        then
+                echo "Skipping 'source' step: '-S' option was not specified"
+                return
+        fi
+
+        do_oe "$path" "xenclient-dom0" "xenclient-source-image"
+
         pushd "$path" > /dev/null
 
         if [ "$SOURCE" -eq 0 ]
@@ -531,20 +495,6 @@ do_oe_source_copy()
         popd > /dev/null
 }
 
-do_oe_source()
-{
-        local path="$1"
-
-        if [ "$SOURCE" -eq 0 ]
-        then
-                echo "Skipping 'source' step: '-S' option was not specified"
-                return
-        fi
-
-        do_oe "$path" "xenclient-dom0" "xenclient-source-image"
-        do_oe_source_copy "$path"
-}
-
 do_oe_packages_tree()
 {
         local path="$1"
@@ -563,11 +513,11 @@ do_oe_copy_licenses()
 {
         local path="$1"
         local binaries="tmp-eglibc/deploy/images"
+        local licences="$OUTPUT_DIR/$NAME/raw/licences"
 
         pushd "$path"
 
         # Copy list of packages and licences for each image
-        local licences="$OUTPUT_DIR/$NAME/raw/licences"
 
         rm -rf "$licences"
         mkdir -p "$OUTPUT_DIR/$NAME/raw/licences"
@@ -1324,14 +1274,6 @@ do_copy()
         rsync -ltzr --chmod=Fgo+r,Dgo+rx "$OUTPUT_DIR/$NAME" "$BUILD_RSYNC_DESTINATION/$ORIGIN_BRANCH"
 }
 
-do_bg()
-{
-        log="$CMD_DIR/$1.log"
-
-        echo "Start task $1 (log=$log)"
-        $* > "$log" 2>&1 &
-}
-
 get_version()
 {
         . ${CMD_DIR}/version
@@ -1387,8 +1329,6 @@ do_build()
                 IFS="$OLDIFS" ; export IFS
 
                 name="`echo "$i" | cut -d" " -f1`"
-                bg=""
-                [ "`expr "$i" : ".* &"`" != "0" ] && bg="do_bg"
                 case "$i" in
                         sync_cache_back)
                                 do_sync_cache_back ;;
@@ -1403,53 +1343,35 @@ do_build()
                         extra_pkgs)
                                 do_oe_extra_pkgs "$path" ;; 
                         dom0)
-                                $bg do_oe_dom0 "$path" ;;
-                        dom0cp)
-                                do_oe_dom0_copy "$path" ;;
+                                do_oe_dom0 "$path" ;;
                         sysroot)
-                                $bg do_oe_sysroot "$path" ;;
-                        sysrootcp)
-                                do_oe_sysroot_copy "$path" ;;
+                                do_oe_sysroot "$path" ;;
                         initramfs)
-                                $bg do_oe "$path" "xenclient-dom0" "xenclient-initramfs-image" ;;
+                                do_oe "$path" "xenclient-dom0" "xenclient-initramfs-image" ;;
                         stubinitramfs)
-                                $bg do_oe "$path" "xenclient-stubdomain" "xenclient-stubdomain-initramfs-image" ;;
+                                do_oe "$path" "xenclient-stubdomain" "xenclient-stubdomain-initramfs-image" ;;
                         installer)
-                                $bg do_oe_installer "$path" ;;
-                        installercp)
-                                do_oe_installer_copy "$path" ;;
+                                do_oe_installer "$path" ;;
                         installer2)
-                                $bg do_oe_installer_part2 "$path" ;;
-                        installer2cp)
-                                do_oe_installer_part2_copy "$path" ;;
+                                do_oe_installer_part2 "$path" ;;
                         license)
-                                $bg do_oe_copy_licenses "$path" ;;
+                                do_oe_copy_licenses "$path" ;;
                         sourceinfo)
-                                $bg do_oe_merge_src_info "$path" ;;
+                                do_oe_merge_src_info "$path" ;;
                         uivm)
-                                $bg do_oe_uivm "$path" ;;
+                                do_oe_uivm "$path" ;;
                         ndvm)
-                                $bg do_oe_ndvm "$path" ;;
+                                do_oe_ndvm "$path" ;;
                         syncvm)
-                                $bg do_oe_syncvm "$path" ;;
+                                do_oe_syncvm "$path" ;;
                         syncui)
-                                $bg do_oe_syncui "$path" ;;
-                        uivmcp)
-                                do_oe_uivm_copy "$path" ;;
-                        ndvmcp)
-                                do_oe_ndvm_copy "$path" ;;
-                        vpnvmcp)
-                                do_oe_vpnvm_copy "$path" ;;
-                        syncvmcp)
-                                do_oe_syncvm_copy "$path" ;;
-                        syncuicp)
-                                do_oe_syncui_copy "$path" ;;
+                                do_oe_syncui "$path" ;;
                         xctools)
-                                $bg do_xctools "$path/xctools" ;;
+                                do_xctools "$path/xctools" ;;
                         debian)
-                                $bg do_debian_xctools "." "xc-tools-tmp/linux" ;;
+                                do_debian_xctools "." "xc-tools-tmp/linux" ;;
                         oldxctools)
-                                $bg do_useexisting_xctools "$path/xctools" ;;
+                                do_useexisting_xctools "$path/xctools" ;;
                         debian_repo_xctools)
                                 do_xctools_debian_repo "$path" ;;
                         debian_repo_xctools_copy)
@@ -1468,14 +1390,6 @@ do_build()
                                 do_sdk ;;
                         rmoutput)
                                 do_rmoutput ;;
-                        wait)
-                                arg="`echo "$i" | cut -d" " -f2`"
-                                eval pid='$'"${arg}_pid"
-                                echo "Wait for task $arg (pid=$pid)"
-                                wait "$pid" ||  \
-                                ( echo "Task $arg failed" ; \
-                                tail "$CMD_DIR/$arg.log" && exit "$?" )
-                                ;;
                         *)
                                 echo "ERROR: unknown step $i"
                                 exit 1
