@@ -400,28 +400,6 @@ do_oe_ndvm()
         do_oe_ndvm_copy $path
 }
 
-do_oe_nilfvm_copy()
-{
-        local path="$1"
-        do_oe_copy "$path" "nilfvm" "xenclient-nilfvm" "xenclient-nilfvm"
-
-        local binaries="tmp-eglibc/deploy/images"
-        pushd "$path"
-        cp "$binaries/service-nilfvm" "$OUTPUT_DIR/$NAME/raw/service-nilfvm"
-        popd
-}
-
-do_oe_nilfvm()
-{
-        local path="$1"
-
-        echo This step is now useless, everything we need should be built as part of the tools.
-        return
-
-        do_oe "$path" "xenclient-nilfvm" "xenclient-nilfvm-image"
-        do_oe_nilfvm_copy $path
-}
-
 do_oe_syncvm_copy()
 {
         local path="$1"
@@ -1505,11 +1483,6 @@ do_build()
                                 $bg do_oe_uivm "$path" ;;
                         ndvm)
                                 $bg do_oe_ndvm "$path" ;;
-                        nilfvm)
-                                $bg do_oe_nilfvm "$path" ;;
-                        vpnvm)
-                                # for retro-compatibility
-                                $bg do_oe_nilfvm "$path" ;;
                         syncvm)
                                 $bg do_oe_syncvm "$path" ;;
                         syncui)
