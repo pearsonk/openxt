@@ -59,9 +59,15 @@ function write-config-value([string]$config, [string]$name, [string]$value)
 
     if (!$node)
     {
-        return $false
+        $root = $xd.SelectSingleNode("/WinbuildConfig")
+        $newnode = $xd.CreateElement($name)
+        $newnode.InnerText = $value
+        $root.PrependChild($newnode)
     }
-    $node.set_InnerXml($value)
+    else
+    {
+        $node.set_InnerXml($value)
+    }
     
     $xd.Save($config)
     return $true

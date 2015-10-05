@@ -166,6 +166,27 @@ function update-config-file($argtable)
         {
             throw ("Failed to update config file with signing certificate name! - value: " + $argtable["certname"])
         }
+        # Set thumbprints of certificates under this
+        $certificates = (dir cert:\CurrentUser\My | where {$_.subject.StartsWith("CN=$CertName")})
+        foreach ($certificate in $certificates)
+        {
+            if ($certificate.SignatureAlgorithm.FriendlyName.StartsWith("sha1"))
+            {
+                $ret = write-config-value -config $global:cfgfile -name "SHA1Thumb" -value $certificate.Thumbprint
+                if (!$ret)
+                {
+                    throw ("Failed to set SHA1 certificate thumbprint into configuration file")
+                }
+            }
+            if ($certificate.SignatureAlgorithm.FriendlyName.StartsWith("sha256"))
+            {
+                $ret = write-config-value -config $global:cfgfile -name "SHA256Thumb" -value $certificate.Thumbprint
+                if (!$ret)
+                {
+                    throw ("Failed to set SHA256 certificate thumbprint into configuration file")
+                }
+            }
+        }
     }
 
     if ($argtable["license"].Length -gt 0)
